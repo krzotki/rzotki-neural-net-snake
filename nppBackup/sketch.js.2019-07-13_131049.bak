@@ -1,0 +1,35 @@
+
+var canvas =  document.getElementById("canv");
+canvas.width =  800;
+canvas.height = 800;
+
+
+var drawInter;
+var snakes = [];
+
+
+function draw()
+{
+	var ctx = canvas.getContext("2d");
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	for(var i in snakes)
+	{
+		var result = snakes[i].update(ctx);
+		if(result.collide)
+		{
+			snakes.shift();
+			snakes.push(new Snake)
+		}
+	}
+}
+drawInter = setInterval(draw,1000/10);
+
+onkeydown = function(event)
+{
+	var key = event.key;
+	if(key=="ArrowUp")snakes[0].steer("U");
+	if(key=="ArrowDown")snakes[0].steer("D");
+	if(key=="ArrowLeft")snakes[0].steer("L");
+	if(key=="ArrowRight")snakes[0].steer("R");
+	if(key==" ")snakes[0].enlarge();
+}

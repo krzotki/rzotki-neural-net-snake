@@ -1,0 +1,35 @@
+class Snake
+{
+	constructor(brain)
+	{
+		this.x = 0;
+		this.y = 0;
+		this.length =1;
+		this.body = [];
+		this.instructions = [];
+		//x y direction
+		var firstInstruction = [0,0,"R"];
+		this.instructions.push(firstInstruction);
+		this.head = new BodyPart(this.x,this.y,this.width,this.height,this.instructions);
+	}
+}
+
+class BodyPart
+{
+	constructor(x,y,width,height,instructions)
+	{
+		this.x=x;
+		this.y=y;
+		this.width = width;
+		this.height = height;
+		this.instructions = instructions;
+		this.speedX =0;
+		this.speedY=0;
+	}
+	update()
+	{
+		
+		
+	}
+	
+}

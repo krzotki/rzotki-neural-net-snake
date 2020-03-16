@@ -1,0 +1,302 @@
+class Snake
+{
+	constructor(brain)
+	{
+		this.fitness=0;
+		this.brain = brain;
+		this.instructions = [];
+		this.body = [];
+		this.size = 25;
+		this.body.push(new BodyPart(canvas.width/2-this.size,canvas.height/2-this.size,this.size));
+		this.collide = false;
+		this.points =0;
+		this.apple = new Apple(this.size);
+		this.traveledDistance =0;
+		this.moves = 250;
+		this.map = new Map(canvas.width,this.size);
+	}
+	update(ctx)
+	{
+		this.moves--;
+		if(this.moves==0)this.collide=true;
+		this.traveledDistance++;
+		this.map.update();
+		this.apple.update(ctx);
+		var a1 = this.apple.index1;
+		var a2 = this.apple.index2;
+		try{
+			this.map.cells[a1-1][a2-1] = 5;
+			this.map.cells[a1][a2-1] = 5;
+			this.map.cells[a1+1][a2-1] = 5;
+			this.map.cells[a1-1][a2] = 5;
+			this.map.cells[a1][a2] = 10;
+			this.map.cells[a1+1][a2] = 5;
+			this.map.cells[a1-1][a2+1] = 5;
+			this.map.cells[a1][a2+1] = 5;
+			this.map.cells[a1+1][a2+1] = 5;
+		}
+		catch
+		{
+			
+		}
+		
+		for(var i in this.body)
+		{
+			if(i==0)this.body[i].update(ctx,"#0000FF");
+			else this.body[i].update(ctx,"#00FF00");
+			
+			var b1 = this.body[i].index1;
+			var b2 = this.body[i].index2;
+			try{
+				this.map.cells[b1][b2] = -10;
+			}
+			catch
+			{
+				
+			}
+		}
+		this.think();
+		this.collison();
+	
+		return this;
+	}
+	steer(direction)
+	{
+		
+		var instruction = [this.body[0].x,this.body[0].y,direction];
+		for(var i in this.body)
+		{
+			this.body[i].instructions.push(instruction);
+		}
+	}
+	enlarge()
+	{
+		var x,y;
+		var lastElem = this.body[this.body.length-1];
+		var speedX = lastElem.speedX;
+		var speedY = lastElem.speedY;
+		
+		if(speedX>0)
+		{
+			x = lastElem.x - lastElem.size;
+			y = lastElem.y;
+		}
+		if(speedX<0)
+		{
+			x = lastElem.x + lastElem.size;
+			y = lastElem.y;
+		}
+		if(speedY>0)
+		{
+			y = lastElem.y - lastElem.size;
+			x = lastElem.x;
+		}
+		if(speedY<0)
+		{
+			y = lastElem.y + lastElem.size;
+			x = lastElem.x;
+		}
+		var temp = new BodyPart(x,y,this.size);
+		temp.speedX = speedX;
+		temp.speedY = speedY;
+		for(var i in lastElem.instructions)
+		{
+			temp.instructions.push(lastElem.instructions[i]);
+		}
+		this.body.push(temp);
+	}
+	collison()
+	{
+		
+		var temp = this.body[0];
+		if(temp.x+temp.size>canvas.width || temp.x<0 || temp.y+temp.size>canvas.height || temp.y<0)
+		{
+			this.collide=true;
+			return;
+		}
+		for(var g in this.body)
+		{
+			if(g==0 || g==1)continue;
+			var temp2 = this.body[g];
+			if(temp.x+temp.size> temp2.x && temp.x<temp2.x+temp2.size && temp.y+temp.size> temp2.y && temp.y<temp2.y+temp2.size)
+			{
+				this.collide=true;
+				return;
+			}
+			
+		}
+		var temp2 = this.apple;
+		if(temp.x+temp.size> temp2.x && temp.x<temp2.x+temp2.size && temp.y+temp.size> temp2.y && temp.y<temp2.y+temp2.size)
+		{
+			this.enlarge();
+			this.apple = new Apple(this.size);
+			this.points++;
+			this.moves+=100;
+		}
+	}
+	think()
+	{
+		var inputArray =[];
+		for(var i in this.map.cells)
+		{
+			for(var g in this.map.cells)
+			{
+				//inputArray.push(this.map.cells[i][g]);
+			}	
+		}
+		var input1 = this.body[0].x/canvas.width;
+		var input2 = this.body[0].y/canvas.height;
+		var input3 = (canvas.width -this.body[0].x) /canvas.width;
+		var input4 = (canvas.height - this.body[0].y) /canvas.height;
+		var input5 = (this.apple.x - this.body[0].x)/canvas.width;
+		var input6 = (this.apple.y - this.body[0].y)/canvas.height;
+		var input7 = this.body[0].speedX/this.size;
+		var input8 = this.body[0].speedY/this.size;
+		inputArray.push(input1);
+		inputArray.push(input2);
+		inputArray.push(input3);
+		inputArray.push(input4);
+		inputArray.push(input5);
+		inputArray.push(input6);
+		inputArray.push(input7);
+		inputArray.push(input8);
+		var bestGuess =0;
+		var index;
+		var outputs = this.brain.guess(inputArray);
+		
+		for(var i=0;i<outputs.length;i++)
+		{
+			if(outputs[i]>bestGuess)
+			{
+				index=i;
+				bestGuess = outputs[i];
+			}
+		}
+		
+		if(index==0)this.steer("U");
+		if(index==1)this.steer("D");
+		if(index==2)this.steer("L");
+		if(index==3)this.steer("R");
+	}
+	calculateFitness()
+	{
+		var distance = Math.sqrt(Math.pow(this.body[0].x - this.apple.x,2)+Math.pow(this.body[0].y- this.apple.y,2));
+		this.fitness = this.traveledDistance*0.6;
+		this.fitness-= distance/40;
+		this.fitness += Math.pow(this.points,6);
+		this.fitness = Math.pow(this.fitness,5);
+
+	}
+}
+
+class BodyPart
+{
+	constructor(x,y,size)
+	{
+		this.x=x;
+		this.y=y;
+		this.size = size;
+		this.instructions = [];
+		this.speedX=0;
+		this.speedY=0;
+		this.mapIndex1;
+		this.mapIndex2;
+	}
+	update(ctx,color)
+	{
+		this.steer();
+		this.x += this.speedX;
+		this.y += this.speedY;
+		ctx.fillStyle =color;
+		ctx.fillRect(this.x,this.y,this.size,this.size);
+		this.index1 = this.x / this.size;
+		this.index2 = this.y / this.size;
+	}
+	steer()
+	{
+		if(this.instructions.length==0)return;
+		if(this.instructions[0][0] == this.x && this.instructions[0][1]==this.y)
+		{
+			if(this.instructions[0][2]=="U" && this.speedY==0)
+			{
+				this.speedX=0;
+				this.speedY =-this.size;
+			}
+			if(this.instructions[0][2]=="D" && this.speedY==0)
+			{
+				this.speedX=0;
+				this.speedY =this.size;
+			}
+			if(this.instructions[0][2]=="L" && this.speedX==0)
+			{
+				this.speedY=0;
+				this.speedX =-this.size;
+			}
+			if(this.instructions[0][2]=="R" && this.speedX==0)
+			{
+				this.speedY=0;
+				this.speedX =this.size;
+			}
+			this.instructions.shift();
+		}
+	}
+	
+}
+
+class Apple
+{
+	constructor(size)
+	{
+		this.size = size;
+		var randomX = getRandomInt(0,canvas.width);
+		randomX = randomX - randomX%this.size;
+		this.x = randomX
+		var randomY = getRandomInt(0,canvas.height);
+		randomY = randomY - randomY%this.size;
+		this.y = randomY;
+		this.index1;
+		this.index2;
+	}
+	update(ctx)
+	{
+		this.index1 = this.x/this.size;
+		this.index2 = this.y/this.size;
+		ctx.fillStyle="#FF0000";
+		ctx.fillRect(this.x,this.y,this.size,this.size);
+	}
+}
+
+class Map
+{
+	constructor(width,size)
+	{
+		var rows = width/size;
+		this.rows = rows;
+		this.cells = [];
+		for(var i =0;i<this.rows;i++)
+		{
+			var temp = [];
+			for(var g =0; g<this.rows;g++)
+			{
+			if(i==0 || g==0 || i==this.rows-1 || g==this.rows-1)temp.push(-10);
+				else temp.push(1);
+				
+			}
+			this.cells.push(temp);
+		}
+	}
+	update()
+	{
+		for(var i =0;i<this.rows;i++)
+		{
+			for(var g =0; g<this.rows;g++)
+			{
+				if(i==0 || g==0 || i==this.rows-1 || g==this.rows-1)this.cells[i][g] = -10;
+				else this.cells[i][g] = 1;
+				
+			}
+		}
+	}
+	
+}
+

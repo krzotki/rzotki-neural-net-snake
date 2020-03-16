@@ -1,0 +1,38 @@
+class Snake
+{
+	constructor(brain)
+	{
+		
+	}
+	update(ctx)
+	{
+		
+	}
+	steer(direction)
+	{
+		
+	}
+	enlarge()
+	{
+		
+	}
+}
+
+
+
+class BodyPart
+{
+	constructor(x,y,width,height,instructions)
+	{
+		
+	}
+	update(ctx,color)
+	{
+	
+	}
+	steer()
+	{
+		
+	}
+	
+}

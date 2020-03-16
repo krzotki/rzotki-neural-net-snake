@@ -1,0 +1,57 @@
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+} 
+
+var canvas =  document.getElementById("canv");
+canvas.width =  800;
+canvas.height = 800;
+var drawInter;
+var snakes = [];
+var deadSnakes =[];
+var maxPopulation = 10;
+var hiddenLayers =1;
+var hiddenNodes = 16;
+
+function draw()
+{
+	var ctx = canvas.getContext("2d");
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	for(var i in snakes)
+	{
+		var result = snakes[i].update(ctx);
+	}
+	for(var i=0;i<snakes.length;i++)
+	{
+		if(snakes[i].collide)
+		{
+			snakes[i].calculateFitness();
+			deadSnakes.push(snakes[i]);
+			snakes.splice(i,1);
+		}
+	}
+	if(snakes.length==0)
+	{
+		snakes = nextGeneration(deadSnakes);
+	}
+}
+
+for(var i =0;i<maxPopulation;i++)
+{
+	var nn = new NeuralNetwork(8,hiddenLayers,4,hiddenNodes);
+	snakes.push(new Snake(nn))
+}
+
+drawInter = setInterval(draw,1000/20);
+
+onkeydown = function(event)
+{
+	var key = event.key;
+	if(key=="ArrowUp")snakes[0].steer("U");
+	else if(key=="ArrowDown")snakes[0].steer("D");
+	else if(key=="ArrowLeft")snakes[0].steer("L");
+	else if(key=="ArrowRight")snakes[0].steer("R");
+	
+}

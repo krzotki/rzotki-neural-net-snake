@@ -1,0 +1,11 @@
+
+var canvas =  document.getElementById("canv");
+canvas.width =  screen.width/2-100;
+canvas.height = canvas.width-100;
+
+
+function draw()
+{
+	var ctx = canvas.getContext("2d");
+	
+}

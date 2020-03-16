@@ -1,0 +1,115 @@
+class Snake
+{
+	constructor(brain)
+	{
+		this.instructions = [];
+		this.body = [];
+		this.size = 25;
+		this.body.push(new BodyPart(this.size,0,this.size));
+		this.tailLength =0;
+	}
+	update(ctx)
+	{
+		for(var i in this.body)
+		{
+			if(i==0)this.body[i].update(ctx,"#0000FF");
+			else this.body[i].update(ctx,"#00FF00");
+		}
+		//if(this.instructions.length>this.tailLength)this.instructions.shift();
+	}
+	steer(direction)
+	{
+		var instruction = [this.body[0].x,this.body[0].y,direction];
+		this.instructions.push(instruction);
+		for(var i in this.body)
+		{
+			this.body[i].instructions.push(instruction);
+		}
+	}
+	enlarge()
+	{
+		this.tailLength++;
+		var x,y;
+		var lastElem = this.body[this.body.length-1];
+		var speedX = lastElem.speedX;
+		var speedY = lastElem.speedY;
+		
+		if(speedX>0)
+		{
+			x = lastElem.x - lastElem.size;
+			y = lastElem.y;
+		}
+		if(speedX<0)
+		{
+			x = lastElem.x + lastElem.size;
+			y = lastElem.y;
+		}
+		if(speedY>0)
+		{
+			y = lastElem.y - lastElem.size;
+			x = lastElem.x;
+		}
+		if(speedY<0)
+		{
+			y = lastElem.y + lastElem.size;
+			x = lastElem.x;
+		}
+		var temp = new BodyPart(x,y,this.size);
+		temp.speedX = speedX;
+		temp.speedY = speedY;
+		temp.instructions = this.instructions;
+		this.body.push(temp);
+	}
+}
+
+
+
+class BodyPart
+{
+	constructor(x,y,size)
+	{
+		this.x=x;
+		this.y=y;
+		this.size = size;
+		this.instructions = [];
+		this.speedX=0;
+		this.speedY=0;
+	}
+	update(ctx,color)
+	{
+		this.steer();
+		this.x += this.speedX;
+		this.y += this.speedY;
+		ctx.fillStyle =color;
+		ctx.fillRect(this.x,this.y,this.size,this.size);
+	}
+	steer()
+	{
+		if(this.instructions.length==0)return;
+		if(this.instructions[0][0] == this.x && this.instructions[0][1]==this.y)
+		{
+			if(this.instructions[0][2]=="U" && this.speedY==0)
+			{
+				this.speedX=0;
+				this.speedY =-this.size;
+			}
+			if(this.instructions[0][2]=="D" && this.speedY==0)
+			{
+				this.speedX=0;
+				this.speedY =this.size;
+			}
+			if(this.instructions[0][2]=="L" && this.speedX==0)
+			{
+				this.speedY=0;
+				this.speedX =-this.size;
+			}
+			if(this.instructions[0][2]=="R" && this.speedX==0)
+			{
+				this.speedY=0;
+				this.speedX =this.size;
+			}
+			this.instructions.shift();
+		}
+	}
+	
+}

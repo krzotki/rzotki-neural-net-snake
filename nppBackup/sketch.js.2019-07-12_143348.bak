@@ -1,0 +1,4 @@
+
+var canvas =  document.getElementById("canv");
+canvas.width =  screen.width/2;
+canvas.height = canvas.width;

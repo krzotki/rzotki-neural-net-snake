@@ -1,0 +1,72 @@
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+} 
+document.getElementById("speed").onchange = function(){
+	drawSpeed = parseInt(document.getElementById("speed").value);
+	clearInterval(drawInter);
+	drawInter = setInterval(draw,1000/drawSpeed);
+}
+
+
+var canvas =  document.getElementById("canv");
+canvas.width =  800;
+canvas.height = 800;
+var drawInter;
+var snakes = [];
+var deadSnakes =[];
+var maxPopulation = 100;
+var inputNumber = 6;
+var outputNumber =4;
+var hiddenLayers =2;
+var hiddenNodes = 5;
+var mutationRate = 10;
+var generation=0;
+var drawSpeed=100;
+function draw()
+{
+	var ctx = canvas.getContext("2d");
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	for(var i in snakes)
+	{
+		var result = snakes[i].update(ctx);
+	}
+	for(var i=0;i<snakes.length;i++)
+	{
+		if(snakes[i].collide)
+		{
+			snakes[i].calculateFitness();
+			deadSnakes.push(snakes[i]);
+			snakes.splice(i,1);
+		}
+	}
+	if(snakes.length==0)
+	{
+		snakes = nextGeneration(deadSnakes);
+		
+		deadSnakes = [];
+	}
+}
+
+function newPopulation()
+{
+	for(var i =0;i<maxPopulation;i++)
+	{
+		var nn = new NeuralNetwork(inputNumber,hiddenLayers,outputNumber,hiddenNodes);
+		snakes.push(new Snake(nn))
+	}
+}
+newPopulation();
+drawInter = setInterval(draw,1000/drawSpeed);
+
+onkeydown = function(event)
+{
+	var key = event.key;
+	if(key=="ArrowUp")snakes[0].steer("U");
+	else if(key=="ArrowDown")snakes[0].steer("D");
+	else if(key=="ArrowLeft")snakes[0].steer("L");
+	else if(key=="ArrowRight")snakes[0].steer("R");
+	
+}

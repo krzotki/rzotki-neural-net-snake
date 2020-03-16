@@ -1,0 +1,21 @@
+
+var canvas =  document.getElementById("canv");
+canvas.width =  800;
+canvas.height = 800;
+
+
+var drawInter;
+var snakes = [];
+
+snakes.push(new Snake)
+function draw()
+{
+	var ctx = canvas.getContext("2d");
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	for(var i in snakes)
+	{
+		i.update(ctx);
+	}
+}
+drawInter = setInterval(draw,1000/100);
+

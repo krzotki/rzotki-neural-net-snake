@@ -1,0 +1,123 @@
+class Snake
+{
+	constructor(brain)
+	{
+		this.x = 25;
+		this.y = 0;
+		this.width = 25;
+		this.height = 25;
+		this.length =1;
+		this.body = [];
+		//x y direction
+		var headInst = [[25,0,"R"]];
+		var tailInst = [[0,0,"R"]];
+		this.head = new BodyPart(this.x,this.y,this.width,this.height,headInst);
+		this.body.push(new BodyPart(this.x-this.width,this.y,this.width,this.height,tailInst));
+	}
+	update(ctx)
+	{
+		this.head.update(ctx,"#0000FF");
+		for(var i in this.body)
+		{
+			this.body[i].update(ctx,"#00FF00");
+		}
+	}
+	steer(direction)
+	{
+		this.head.instructions.push([this.head.x,this.head.y,direction]);
+		for(var i in this.body)
+		{
+			this.body[i].instructions.push([this.head.x,this.head.y,direction]);
+			this.body[i].steer();
+		}
+		console.table(this.body[1].instructions)
+	}
+	enlarge()
+	{
+		var speedX = this.body[this.body.length-1].speedX;
+		var speedY = this.body[this.body.length-1].speedY;
+		var x,y;
+		if(speedX>0)
+		{
+			x = this.body[this.body.length-1].x-this.body[this.body.length-1].height;
+			y = this.body[this.body.length-1].y;
+		}
+		if(speedX<0)
+		{
+			x = this.body[this.body.length-1].x+this.body[this.body.length-1].width;
+			y = this.body[this.body.length-1].y;
+		}
+		if(speedY>0)
+		{
+			y = this.body[this.body.length-1].y-this.body[this.body.length-1].height;
+			x = this.body[this.body.length-1].x;
+		}
+		if(speedY>0)
+		{
+			y = this.body[this.body.length-1].y+this.body[this.body.length-1].height;
+			x = this.body[this.body.length-1].x;
+		}
+		var temp = new BodyPart(x,y,this.width,this.height,this.head.instructions);
+		temp.speedX = speedX;
+		temp.speedY = speedY;
+		this.body.push(temp);
+		this.length++;
+	}
+}
+
+class BodyPart
+{
+	constructor(x,y,width,height,instructions)
+	{
+		this.x=x;
+		this.y=y;
+		this.width = width;
+		this.height = height;
+		this.instructions = instructions;
+		this.speedX=0;
+		this.speedY=0;
+	}
+	update(ctx,color)
+	{
+		this.steer();
+		this.x +=this.speedX;
+		this.y +=this.speedY;
+		ctx.fillStyle = color;
+		ctx.fillRect(this.x,this.y,this.width,this.height);
+	}
+	steer()
+	{
+		for(var i=0;i<this.instructions.length;i++)
+		{
+			var inst = this.instructions[i];
+			if(inst[0]==this.x && inst[1]==this.y)
+			{
+				if(inst[2]=="U" && this.speedY==0)
+				{
+					this.speedX=0;
+					this.speedY=-this.height;
+				}
+				if(inst[2]=="D"&& this.speedY==0)
+				{
+					this.speedX=0;
+					this.speedY=this.height;
+				}
+				if(inst[2]=="L"&&this.speedX==0)
+				{
+					this.speedY=0;
+					this.speedX=-this.width;
+				}
+				if(inst[2]=="R"&&this.speedX==0)
+				{
+					this.speedY=0;
+					this.speedX=this.width;
+				}
+				this.instructions.splice(i);
+
+			}
+			
+		}
+		
+	}
+	
+}

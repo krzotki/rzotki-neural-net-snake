@@ -1,0 +1,85 @@
+class Snake
+{
+	constructor(brain)
+	{
+		this.instructions = [];
+		this.body = [];
+		this.body.push(new BodyPart(25,0,25));
+	}
+	update(ctx)
+	{
+		for(var i in this.body)
+		{
+			if(i==0)this.body[i].update(ctx,"#0000FF");
+			else this.body[i].update(ctx,"#00FF00");
+		}
+	}
+	steer(direction)
+	{
+		var instruction = [this.body[0].x,this.body[0].y,direction];
+		for(var i in this.body)
+		{
+			this.body[i].instructions.push(instruction);
+		}
+	}
+	enlarge()
+	{
+		var x,y;
+		var lastElem = this.body[this.body.length-1];
+		var speedX = lastElem.speedX;
+		var speedY = lastElem.speedY;
+		this.body.push(new BodyPart(0,0,25));
+	}
+}
+
+
+
+class BodyPart
+{
+	constructor(x,y,size)
+	{
+		this.x=x;
+		this.y=y;
+		this.size = size;
+		this.instructions = [];
+		this.speedX=0;
+		this.speedY=0;
+	}
+	update(ctx,color)
+	{
+		this.steer();
+		this.x += this.speedX;
+		this.y += this.speedY;
+		ctx.fillStyle =color;
+		ctx.fillRect(this.x,this.y,this.size,this.size);
+	}
+	steer()
+	{
+		if(this.instructions.length==0)return;
+		if(this.instructions[0][0] == this.x && this.instructions[0][1]==this.y)
+		{
+			if(this.instructions[0][2]=="U" && this.speedY==0)
+			{
+				this.speedX=0;
+				this.speedY =-this.size;
+			}
+			if(this.instructions[0][2]=="D" && this.speedY==0)
+			{
+				this.speedX=0;
+				this.speedY =this.size;
+			}
+			if(this.instructions[0][2]=="L" && this.speedX==0)
+			{
+				this.speedY=0;
+				this.speedX =-this.size;
+			}
+			if(this.instructions[0][2]=="R" && this.speedX==0)
+			{
+				this.speedY=0;
+				this.speedX =this.size;
+			}
+			this.instructions.shift();
+		}
+	}
+	
+}

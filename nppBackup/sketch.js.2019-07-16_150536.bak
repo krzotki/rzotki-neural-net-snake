@@ -1,0 +1,107 @@
+
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+} 
+document.getElementById("speed").onchange = function(){
+	drawSpeed = parseInt(document.getElementById("speed").value);
+	clearInterval(drawInter);
+	drawInter = setInterval(drawHighlight,1000/drawSpeed);
+}
+
+
+var canvas =  document.getElementById("canv");
+canvas.width =  800;
+canvas.height = 800;
+var drawInter;
+var snakes = [];
+var deadSnakes =[];
+var maxPopulation = 100;
+// var inputNumber = (canvas.width/25)*(canvas.width/25)+8;
+var inputNumber = 9;
+var outputNumber =4;
+var hiddenLayers =1;
+var hiddenNodes = 16;
+var mutationRate = 5;
+var generation=0;
+var drawSpeed=100;
+var wannaDraw = true;
+var bestSnake;
+var highlightInter;
+
+
+function skipEvolution(gen)
+{
+	clearInterval(drawInter);
+	wannaDraw = false;
+	while(generation<gen)
+	{
+		justCalculate();
+	}
+	wannaDraw = true;
+	drawInter = setInterval(draw,1000/drawSpeed);
+
+}
+
+function justCalculate()
+{
+	for(var i in snakes)
+	{
+		var result = snakes[i].update();
+	}
+	for(var i=0;i<snakes.length;i++)
+	{
+		if(snakes[i].collide)
+		{
+			snakes[i].calculateFitness();
+			deadSnakes.push(snakes[i]);
+			snakes.splice(i,1);
+		}
+	}
+	if(snakes.length==0)
+	{
+		
+		bestSnake = deadSnakes[deadSnakes.length-1];
+		startHighlight();
+	}
+}
+
+function startHighlight()
+{
+	clearInterval(drawInter);
+	highlightInter = setInterval(drawHighlight,1000/drawSpeed);
+	if(bestSnake.collide)
+	{
+		snakes = nextGeneration(deadSnakes);
+		deadSnakes = [];
+	}
+}
+function drawHighlight()
+{
+	var ctx = canvas.getContext("2d");
+	ctx.clearRect(0,0,canvas.width,canvas.height);
+	var result = bestSnake.update(ctx);
+}
+
+
+function newPopulation()
+{
+	for(var i =0;i<maxPopulation;i++)
+	{
+		var nn = new NeuralNetwork(inputNumber,hiddenNodes,outputNumber,hiddenLayers);
+		snakes.push(new Snake(nn))
+	}
+}
+newPopulation();
+drawInter = setInterval(draw,1000/drawSpeed);
+
+onkeydown = function(event)
+{
+	var key = event.key;
+	if(key=="ArrowUp")snakes[0].steer("U");
+	else if(key=="ArrowDown")snakes[0].steer("D");
+	else if(key=="ArrowLeft")snakes[0].steer("L");
+	else if(key=="ArrowRight")snakes[0].steer("R");
+	
+}
